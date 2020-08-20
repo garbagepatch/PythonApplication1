@@ -9,12 +9,13 @@ from Ui_mainwindow import Ui_MainWindow
 import serial
 import serial.tools.list_ports
 from mettler_toledo_device import MettlerToledoDevice
-import exception
+
 import asyncio
 global scalePort 
 
 class SerialControls(QMainWindow, Ui_MainWindow):
-   
+
+
     def scaleConnectYay(self):
         name = self.scalePortList.currentText()
         global scalePort
@@ -39,7 +40,15 @@ class SerialControls(QMainWindow, Ui_MainWindow):
         self.scaleConnect.clicked.connect(self.scaleConnectYay)
         self.pumpConnect.clicked.connect(self.pumpConnectYay)
         self.expStart.clicked.connect(self.startTheExp)
-    
+    class CollectDataAndPostThread(QThread, Ui_MainWindow):
+        def __init__(self, numstr):
+            QThread.__init__(self)
+            self.numstr = numstr
+        def __del__(self):
+            self.wait()
+        def getdataset(self, numstr):
+            self.resultBox.Append(numstr + "\n")
+            
 
     def connectToPort(self, name):
         try:
@@ -56,8 +65,8 @@ class SerialControls(QMainWindow, Ui_MainWindow):
             results = scalePort.get_weight()
             num = results[0]
             numstr = str(num)
-
-            self.SetText(numstr)
+            self.get_thread = CollectDataAndPostThread(numstr)
+            self.get_thread.start()
 
 
 if __name__ == '__main__':
