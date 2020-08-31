@@ -65,7 +65,7 @@ class Ui_MainWindow(object):
         brush8 = QBrush(QColor(255, 255, 255, 128))
         brush8.setStyle(Qt.SolidPattern)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette.setBrush(QPalette.Active, QPalette.PlaceholderText, brush8)
+
 #endif
         palette.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
         palette.setBrush(QPalette.Inactive, QPalette.Button, brush1)
@@ -83,7 +83,7 @@ class Ui_MainWindow(object):
         palette.setBrush(QPalette.Inactive, QPalette.ToolTipBase, brush7)
         palette.setBrush(QPalette.Inactive, QPalette.ToolTipText, brush6)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush8)
+    
 #endif
         palette.setBrush(QPalette.Disabled, QPalette.WindowText, brush4)
         palette.setBrush(QPalette.Disabled, QPalette.Button, brush1)
@@ -101,7 +101,7 @@ class Ui_MainWindow(object):
         palette.setBrush(QPalette.Disabled, QPalette.ToolTipBase, brush7)
         palette.setBrush(QPalette.Disabled, QPalette.ToolTipText, brush6)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush8)
+      
 #endif
         self.centralwidget.setPalette(palette)
         self.centralwidget.setAutoFillBackground(False)
@@ -179,13 +179,13 @@ class Ui_MainWindow(object):
         brush12 = QBrush(QColor(168, 162, 90, 128))
         brush12.setStyle(Qt.SolidPattern)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette.Active, QPalette.PlaceholderText, brush12)
+ 
 #endif
         palette1.setBrush(QPalette.Inactive, QPalette.WindowText, brush9)
         palette1.setBrush(QPalette.Inactive, QPalette.Text, brush10)
         palette1.setBrush(QPalette.Inactive, QPalette.ToolTipText, brush11)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush12)
+
 #endif
         brush13 = QBrush(QColor(120, 120, 120, 255))
         brush13.setStyle(Qt.SolidPattern)
@@ -195,7 +195,7 @@ class Ui_MainWindow(object):
         brush14 = QBrush(QColor(0, 0, 0, 128))
         brush14.setStyle(Qt.SolidPattern)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush14)
+    
 #endif
         self.label_3.setPalette(palette1)
         self.label_3.setFont(font)
