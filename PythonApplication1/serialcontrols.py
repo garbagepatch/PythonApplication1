@@ -3,6 +3,7 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import QApplication, QMainWindow
 from PySide2.QtUiTools import QUiLoader
+import numpy as np
 import sys
 from Ui_mainwindow import Ui_MainWindow
 import serial
@@ -10,8 +11,10 @@ import serial.tools.list_ports
 from mettler_toledo_device import MettlerToledoDevice
 import threading
 import asyncio.tasks
+import traceback
 import asyncio
 import queue
+import time
 
 class ScaleThread(QThread):
     def __init__(self, portName):
@@ -113,50 +116,75 @@ class Worker(QRunnable):
         self.kwargs = kwargs
         self.signals = WorkerSignals()
         self.running = True
+        self.resultsvector = []
+        self.changevector = []
         self.txq = queue.Queue()
         self.scalePort = MettlerToledoDevice(port=self.name)
+   
         try:
             self.pumpPort = serial.Serial(port=self.pumpname, baudrate=4800, bytesize=serial.SEVENBITS, parity=serial.PARITY_ODD, timeout= 1 )
         except:
             self.pumpPort.close()
             self.pumpPort = serial.Serial(port=self.pumpname, baudrate=4800, bytesize=serial.SEVENBITS, parity=serial.PARITY_ODD, timeout= 1 )
         
-        # Add the callback to our kwargs
+        # Add the callba   ck to our kwargs
     def stop(self):
         self.event
     def cancel(self):
         try:
+            
             self.scalePort.close()
             self.running = False
             self.pumpPort.close()
+            self.resultsvector = []
+            self.changevector =[]
         except: 
             self.scalePort = None
             self.pumpPort = None
         
     @Slot()
     def run(self):
+
         if(self.pumpPort):
             self.pumpPort.close()
         while(self.running):
             try:
-
+                
                 s = self.scalePort.get_weight()
                 if s:
                     num = s[0]
                     inum = int(num)
                     result = str(num)
+                    changes = []
+                    self.resultsvector.append(int(inum))
                     self.signals.result.emit(result)
-                    self.signals.progress.emit(100 * inum/int(0.9*self.max))
-                    if (inum > int(0.9*self.max)):
+                    self.signals.progress.emit(100 * inum/int(0.99*self.max))
+                    if(len(self.resultsvector) > 3):
+                        change = float(self.resultsvector[-1]) - float(self.resultsvector[-2])
+                        self.changevector.append(float(change))
+                    if(len(self.changevector) > 5):
+                        avg = sum(self.changevector)/len(self.changevector)
+                        if((self.changevector[-1]-avg)/avg < -0.4):
+                            self.signals.result.emit("Air in the line or still clamped")
+                            self.cancel()
+                            break                        
+              
+
+                    if (inum > int(0.99*self.max)):
                         self.cancel()
                         break
-   
+                   
+                    
                 if self.scalePort is None:
                     self.cancel()
                     break
             except:
-                 self.cancel()
-                 break
+                traceback.print_exc()
+                exctype, value = sys.exc_info()[:2]
+                self.signals.error.emit((exctype, value, traceback.format_exc()))
+                self.cancel()
+                break
+                 
            # Return the result of the processin
               # Done
         if (self.running == False):
