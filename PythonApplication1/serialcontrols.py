@@ -159,13 +159,16 @@ class Worker(QRunnable):
                     self.resultsvector.append(int(inum))
                     self.signals.result.emit(result)
                     self.signals.progress.emit(100 * inum/int(0.99*self.max))
-                    if(len(self.resultsvector) > 3):
-                        change = float(self.resultsvector[-1]) - float(self.resultsvector[-2])
-                        self.changevector.append(float(change))
+                    if(len(self.resultsvector) > 2):
+                        if(self.resultsvector[-1] != self.resultsvector[-2]):
+
+                            change = float(self.resultsvector[-1]) - float(self.resultsvector[-2])
+                            self.changevector.append(float(change))
                     if(len(self.changevector) > 5):
                         avg = sum(self.changevector)/len(self.changevector)
-                        if((self.changevector[-1]-avg)/avg < -0.4):
+                        if((self.changevector[-1])/avg < 0.4):
                             self.signals.result.emit("Air in the line or still clamped")
+                            self.signals.error.emit((str(self.changevector[-1]), "Rate of change has fallen to low, check line"))
                             self.cancel()
                             break                        
               
@@ -235,7 +238,7 @@ class SerialControls(QMainWindow, Ui_MainWindow):
         self.resultBox.appendPlainText('Shit has stopped, hopefully')
     def setText(self, s):
         self.mutex.lock()
-        self.res = s
+        self.resultBox.appendPlainText(s)
         self.mutex.unlock()
     def startTheExp(self):
         self.timer.start()
