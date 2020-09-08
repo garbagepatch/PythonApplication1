@@ -158,7 +158,7 @@ class Worker(QRunnable):
                     changes = []
                     self.resultsvector.append(int(inum))
                     self.signals.result.emit(result)
-                    self.signals.progress.emit(100 * inum/int(0.99*self.max))
+                    self.signals.progress.emit(100 * inum/int(0.97*self.max))
                     if(len(self.resultsvector) > 2):
                         if(self.resultsvector[-1] != self.resultsvector[-2]):
 
@@ -166,12 +166,16 @@ class Worker(QRunnable):
                             self.changevector.append(float(change))
                     if(len(self.changevector) > 5):
                         avg = sum(self.changevector)/len(self.changevector)
-                        if((self.changevector[-1])/avg < 0.4):
+                        if(avg > 0 and (self.changevector[-1])/avg < 0.1):
                             self.signals.result.emit("Air in the line or still clamped")
                             self.signals.error.emit((str(self.changevector[-1]), "Rate of change has fallen to low, check line"))
                             self.cancel()
-                            break                        
-              
+                            break
+                        elif(avg == 0 and len(self.changevector) <2):
+                            self.signals.result.emit("Air in the line or still clamped")
+                            self.signals.error.emit((str(self.changevector[-1]), "Rate of change has fallen to low, check line"))
+                            self.cancel()
+                            break
 
                     if (inum > int(0.99*self.max)):
                         self.cancel()
@@ -221,6 +225,8 @@ class SerialControls(QMainWindow, Ui_MainWindow):
         self.progressBar.setValue(1)
         self.progressBar.minimum = 0
         self.progressBar.maximum = 100
+        self.scalePortList.activated.connect(self.getThePorts)
+        self.pumpPortList.activated.connect(self.getThePorts)
         try:
             self.pumpPort = serial.Serial(port=self.pumpPortList.currentText(), baudrate=4800, bytesize=serial.SEVENBITS, parity=serial.PARITY_ODD, timeout= 1 )
         except:
@@ -228,7 +234,11 @@ class SerialControls(QMainWindow, Ui_MainWindow):
         self.threadpool = QThreadPool()
         self.expStart.clicked.connect(self.startTheExp)
         self.mutex = QMutex()
-
+    def getThePorts(self):
+        ports = serial.tools.list_ports.comports()
+        for port in ports:
+            self.scalePortList.addItem(port.device)
+            self.pumpPortList.addItem(port.device)
     def stopShit(self):
         self.event_stop.set()
         self.timer.stop()
